@@ -87,6 +87,34 @@
             bottom: 0;
             right: 0;
         }
+        
+        /* Estilos para los elogios explosivos */
+        .burst-text {
+            position: absolute;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
+            color: #ff55ff;
+            text-shadow: 0 0 5px #ff00ff;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            animation: burst-anim 2s forwards;
+            font-size: 24px; /* Tamaño aumentado de las letras explosivas */
+        }
+        
+        @keyframes burst-anim {
+            0% {
+                transform: scale(0.1) translate(0, 0);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -157,7 +185,7 @@
 
         // Crear galaxia uniforme
         const stars = [];
-        for (let i = 0; i < 400; i++) { // Menos estrellas para móvil
+        for (let i = 0; i < 400; i++) {
             stars.push(new Star());
         }
 
@@ -166,7 +194,6 @@
             galaxyCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
             galaxyCtx.fillRect(0, 0, galaxyCanvas.width, galaxyCanvas.height);
             
-            // Algunas estrellas grandes para puntos destacados
             if (Math.random() < 0.02) {
                 galaxyCtx.beginPath();
                 galaxyCtx.arc(
@@ -210,22 +237,22 @@
         ];
 
         const particles = [];
-        const particleCount = 40; // Menos partículas para móvil
+        const particleCount = 40;
 
         for (let i = 0; i < particleCount; i++) {
-            const isText = Math.random() > 0.4; // Más emojis para mejor rendimiento
+            const isText = Math.random() > 0.4;
             particles.push({
                 x: Math.random() * loveCanvas.width,
                 y: Math.random() * -loveCanvas.height,
-                speed: 0.5 + Math.random() * 1.5, // Más lento
-                size: isText ? 8 + Math.random() * 6 : 15 + Math.random() * 15, // Más pequeño
+                speed: 0.5 + Math.random() * 1.5,
+                size: isText ? 14 + Math.random() * 8 : 20 + Math.random() * 15, // Tamaño aumentado
                 content: isText ? 
                     compliments[Math.floor(Math.random() * compliments.length)] : 
                     symbols[Math.floor(Math.random() * symbols.length)],
                 color: colors[Math.floor(Math.random() * colors.length)],
                 rotation: 0,
                 opacity: 0.9,
-                sway: Math.random() * 1 - 0.5, // Menos movimiento lateral
+                sway: Math.random() * 1 - 0.5,
                 swaySpeed: 0.01 + Math.random() * 0.02,
                 isText: isText
             });
@@ -276,7 +303,7 @@
                         compliments[Math.floor(Math.random() * compliments.length)] : 
                         symbols[Math.floor(Math.random() * symbols.length)];
                     particle.color = colors[Math.floor(Math.random() * colors.length)];
-                    particle.size = isText ? 8 + Math.random() * 6 : 15 + Math.random() * 15;
+                    particle.size = isText ? 14 + Math.random() * 8 : 20 + Math.random() * 15; // Tamaño aumentado
                     particle.isText = isText;
                 }
             });
@@ -285,11 +312,57 @@
         }
         animateLove();
 
+        // Función para crear explosión de elogios
+        function createComplimentBurst(x, y) {
+            const burstCount = 10 + Math.floor(Math.random() * 10);
+            const burstCompliments = [
+                "Hermosa", "Preciosa", "Radiante", "Divina", 
+                "Maravillosa", "Perfecta", "Increíble", "Única",
+                "Especial", "Fantástica", "Sensacional", "Deslumbrante"
+            ];
+            
+            for (let i = 0; i < burstCount; i++) {
+                const elogio = document.createElement('div');
+                elogio.className = 'burst-text';
+                elogio.textContent = burstCompliments[Math.floor(Math.random() * burstCompliments.length)];
+                
+                elogio.style.left = `${x}px`;
+                elogio.style.top = `${y}px`;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                const size = 20 + Math.random() * 25; // Tamaño aumentado
+                elogio.style.fontSize = `${size}px`;
+                
+                elogio.style.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                elogio.style.setProperty('--tx', `${tx}px`);
+                elogio.style.setProperty('--ty', `${ty}px`);
+                
+                document.body.appendChild(elogio);
+                
+                setTimeout(() => {
+                    elogio.remove();
+                }, 2000);
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            createComplimentBurst(e.clientX, e.clientY);
+        });
+        
+        document.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            createComplimentBurst(touch.clientX, touch.clientY);
+        });
+
         window.addEventListener('resize', () => {
             resizeCanvases();
         });
 
-        // Evitar zoom con gestos táctiles
         document.addEventListener('gesturestart', function(e) {
             e.preventDefault();
         });
